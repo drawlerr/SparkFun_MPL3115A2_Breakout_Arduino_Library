@@ -84,7 +84,7 @@ float MPL3115A2::readAltitude()
 	// fractional values, so you must cast the calulation in (float),
 	// shift the value over 4 spots to the right and divide by 16 (since 
 	// there are 16 values in 4-bits). 
-	float tempcsb = (lsb>>4)/16.0;
+	float tempcsb = (lsb>>4)/16.0f;
 
 	float altitude = (float)( (msb << 8) | csb) + tempcsb;
 
@@ -94,7 +94,7 @@ float MPL3115A2::readAltitude()
 //Returns the number of feet above sea level
 float MPL3115A2::readAltitudeFt()
 {
-  return(readAltitude() * 3.28084);
+  return(readAltitude() * 3.28084f);
 }
 
 //Reads the current pressure in Pa
@@ -103,11 +103,11 @@ float MPL3115A2::readAltitudeFt()
 float MPL3115A2::readPressure()
 {
 	//Check PDR bit, if it's not set then toggle OST
-	if(IIC_Read(REG_STATUS) & (1 << 2) == 0) toggleOneShot(); //Toggle the OST bit causing the sensor to immediately take another reading
+	if((IIC_Read(REG_STATUS) & (1 << 2)) == 0) toggleOneShot(); //Toggle the OST bit causing the sensor to immediately take another reading
 
 	//Wait for PDR bit, indicates we have new pressure data
 	int counter = 0;
-	while(IIC_Read(REG_STATUS) & (1 << 2) == 0)
+	while((IIC_Read(REG_STATUS) & (1 << 2)) == 0)
 	{
 		if(++counter > 600) return(-999); //Error out after max of 512ms for a read
 		delay(1);
@@ -134,7 +134,7 @@ float MPL3115A2::readPressure()
 
 	lsb &= 0x3F; // B00110000; //Bits 5/4 represent the fractional component
 	lsb >>= 4; //Get it right aligned
-	float pressure_decimal = (float)lsb/4.0; //Turn it into fraction
+	float pressure_decimal = (float)lsb/4.0f; //Turn it into fraction
 
 	float pressure = (float)pressure_whole + pressure_decimal;
 
@@ -143,7 +143,7 @@ float MPL3115A2::readPressure()
 
 float MPL3115A2::readTemp()
 {
-	if(IIC_Read(REG_STATUS) & (1 << 1) == 0) toggleOneShot(); //Toggle the OST bit causing the sensor to immediately take another reading
+	if((IIC_Read(REG_STATUS) & (1 << 1)) == 0) toggleOneShot(); //Toggle the OST bit causing the sensor to immediately take another reading
 
 	//Wait for TDR bit, indicates we have new temp data
 	int counter = 0;
@@ -184,19 +184,19 @@ float MPL3115A2::readTemp()
 	// fractional values, so you must cast the calulation in (float),
 	// shift the value over 4 spots to the right and divide by 16 (since 
 	// there are 16 values in 4-bits). 
-	float templsb = (lsb>>4)/16.0; //temp, fraction of a degree
+	float templsb = (lsb>>4)/16.0f; //temp, fraction of a degree
 
-	float temperature = (float)(msb + templsb);
+	auto temperature = (float)(msb + templsb);
 
 	if (negSign) temperature = 0 - temperature;
-	
+
 	return(temperature);
 }
 
 //Give me temperature in fahrenheit!
 float MPL3115A2::readTempF()
 {
-  return((readTemp() * 9.0)/ 5.0 + 32.0); // Convert celsius to fahrenheit
+  return((readTemp() * 9.0f)/ 5.0f + 32.0f); // Convert celsius to fahrenheit
 }
 
 //Sets the mode to Barometer
@@ -259,7 +259,7 @@ void MPL3115A2::enableEventFlags()
 
 //Clears then sets the OST bit which causes the sensor to immediately take another reading
 //Needed to sample faster than 1Hz
-void MPL3115A2::toggleOneShot(void)
+void MPL3115A2::toggleOneShot()
 {
   byte tempSetting = IIC_Read(CTRL_REG1); //Read current settings
   tempSetting &= ~(1<<1); //Clear OST bit
