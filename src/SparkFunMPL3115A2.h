@@ -21,7 +21,7 @@
 // Define MPL3115A2 registers
 enum mpl3115a2_regs
 {
-	STATUS     = 0x00,
+	REG_STATUS     = 0x00,
 	OUT_P_MSB  = 0x01,
 	OUT_P_CSB  = 0x02,
 	OUT_P_LSB  = 0x03,
