@@ -8,3 +8,7 @@
 *.s#?
 *.orig
 *.epf
+.idea/
+.pio/
+CMakeLists*
+cmake-build-*
